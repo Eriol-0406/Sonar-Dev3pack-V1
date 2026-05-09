@@ -66,6 +66,11 @@ export type RiskVerdict = {
   ctx: RiskContext;
   findings: RiskFinding[];
   voiceScript: string;
+  // data:audio/mpeg;base64,... — null if TTS failed or skipped (low risk).
+  // Inlined here so the frontend doesn't need a follow-up /voice/:sessionId
+  // request; that round trip can't survive Vercel's cross-instance routing
+  // without a shared store.
+  voiceAudioDataUrl: string | null;
   sessionId: string;
 };
 

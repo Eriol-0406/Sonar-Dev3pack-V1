@@ -106,9 +106,16 @@ function showIntervention(verdict) {
     els.iFindings.appendChild(li);
   }
 
-  els.iAudio.src = `/voice/${verdict.sessionId}`;
-  els.iAudio.load();
-  els.iAudio.play().catch(() => { });
+  // Audio is inlined in the verdict (data:audio/mpeg;base64,...) so the
+  // browser plays without a follow-up request — required for prod, where
+  // /voice/:sessionId can't find the cooldown row across function instances.
+  if (verdict.voiceAudioDataUrl) {
+    els.iAudio.src = verdict.voiceAudioDataUrl;
+    els.iAudio.load();
+    els.iAudio.play().catch(() => { });
+  } else {
+    els.iAudio.removeAttribute('src');
+  }
 
   els.confirmBtn.disabled = true;
   startCooldown(verdict.cooldownSeconds);
@@ -149,34 +156,11 @@ function closeIntervention() {
 
 async function confirmSign() {
   if (!activeSession) return;
-  const wallet = walletPubkey ?? '11111111111111111111111111111111';
-  try {
-    const ackRes = await fetch(`/cooldown/${activeSession.sessionId}/acknowledge`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ wallet }),
-    });
-    if (!ackRes.ok) {
-      const err = await ackRes.json().catch(() => ({}));
-      throw new Error(err.error ?? `acknowledge failed (HTTP ${ackRes.status})`);
-    }
-    const { confirmToken } = await ackRes.json();
-
-    const res = await fetch('/confirm', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId: activeSession.sessionId, wallet, confirmToken }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message ?? err.error ?? `HTTP ${res.status}`);
-    }
-    setStatus('⚠ Transaction signed despite warnings. (mock)', 'error');
-  } catch (err) {
-    setStatus(`Confirmation rejected: ${err.message}`, 'error');
-  } finally {
-    closeIntervention();
-  }
+  // Pure client-side. The cooldown timer above already gated this button;
+  // the server-side ack/confirm flow needed shared session storage we
+  // intentionally don't have, so we no longer round-trip through it.
+  setStatus('⚠ Transaction signed despite warnings. (mock)', 'error');
+  closeIntervention();
 }
 
 function cancelSign() {

@@ -5,7 +5,7 @@ import { parseInterceptorPayload } from '../lib/modules/interceptor.js';
 import { gather } from '../lib/modules/simulator.js';
 import { score, cooldownFor } from '../lib/modules/scorer.js';
 import { startCooldown } from '../lib/modules/cooldown.js';
-import { buildVoiceScript } from '../lib/modules/voice.js';
+import { buildVoiceScript, voiceProvider } from '../lib/modules/voice.js';
 import { ensureUser } from '../lib/db/users.js';
 import { logRisk } from '../lib/db/riskLogs.js';
 import type { RiskVerdict } from '../lib/types.js';
@@ -28,15 +28,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const cooldownSeconds = cooldownFor(riskScore);
     const sessionId = randomUUID();
     const voiceScript = buildVoiceScript(findings, riskScore, sessionId);
+    const riskRequired = riskScore >= 40;
+
+    // Generate audio inline so the frontend doesn't have to fetch
+    // /voice/:sessionId — that follow-up request can't see the cooldown row
+    // when Vercel routes it to a different function instance.
+    let voiceAudioDataUrl: string | null = null;
+    if (riskRequired) {
+      try {
+        const buf = await voiceProvider.generate(voiceScript, sessionId);
+        voiceAudioDataUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
+      } catch (err) {
+        console.error('[/api/analyze] voice generation failed (continuing):', err);
+      }
+    }
 
     const verdict: RiskVerdict = {
-      riskRequired: riskScore >= 40,
+      riskRequired,
       score: riskScore,
       cooldownSeconds,
       sim,
       ctx,
       findings,
       voiceScript,
+      voiceAudioDataUrl,
       sessionId,
     };
 
@@ -50,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       counterparty: ctx.counterparty,
     });
 
-    if (verdict.riskRequired) await startCooldown(verdict, payload.wallet);
+    if (riskRequired) await startCooldown(verdict, payload.wallet);
 
     return res.status(200).json(verdict);
   } catch (err) {
