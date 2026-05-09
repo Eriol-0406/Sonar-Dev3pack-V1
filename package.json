@@ -1,0 +1,23 @@
+{
+  "name": "sonar",
+  "version": "0.2.0",
+  "description": "SONAR — behavioral security layer for Solana wallets.",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.9.0",
+    "@vercel/node": "^3.2.24",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.6.3",
+    "vercel": "^39.0.0"
+  }
+}

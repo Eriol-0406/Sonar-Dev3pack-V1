@@ -1,0 +1,23 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/risk", "destination": "/api/analyze" },
+    { "source": "/analyze", "destination": "/api/analyze" },
+    { "source": "/confirm", "destination": "/api/confirm" },
+    { "source": "/voice/generate", "destination": "/api/voice" },
+    { "source": "/voice/:sessionId", "destination": "/api/voice?sessionId=:sessionId" },
+    { "source": "/cooldown/start", "destination": "/api/cooldown?action=start" },
+    { "source": "/cooldown/:sessionId", "destination": "/api/cooldown?sessionId=:sessionId&action=status" },
+    { "source": "/cooldown/:sessionId/acknowledge", "destination": "/api/cooldown?sessionId=:sessionId&action=acknowledge" },
+    { "source": "/users/:wallet", "destination": "/api/users?wallet=:wallet&action=profile" },
+    { "source": "/users/:wallet/preferences", "destination": "/api/users?wallet=:wallet&action=preferences" },
+    { "source": "/users/:wallet/risk-logs", "destination": "/api/users?wallet=:wallet&action=risk-logs" },
+    { "source": "/users/:wallet/baseline", "destination": "/api/users?wallet=:wallet&action=baseline" },
+    { "source": "/health", "destination": "/api/health" }
+  ],
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
+}

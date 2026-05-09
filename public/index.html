@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SONAR — Behavioral Security for Solana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style.css" />
+  <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "topojson-client": "https://cdn.jsdelivr.net/npm/topojson-client@3/+esm"
+        }
+      }
+    </script>
+</head>
+
+<body>
+  <!-- Abstract Security Core Background -->
+  <div id="three-container" class="core-background"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo-dot"></span>
+      <span class="logo-text">SONAR</span>
+      <span class="logo-tag">// BEHAVIORAL SECURITY CORE</span>
+    </div>
+    <button id="connectBtn" class="btn-ghost">INITIALIZE CONNECTION</button>
+  </header>
+
+  <main class="stage">
+    <section class="hero glass-panel">
+      <h1>SECURITY PROTOCOL TESTING</h1>
+      <p class="lede">
+        Initiate a scenario. SONAR will intercept the payload, analyze the risk matrix,
+        enforce a temporal cooldown, and deploy an audio warning before signature authorization.
+      </p>
+
+      <div class="input-wrapper" style="display: flex; gap: 16px; margin-bottom: 24px;">
+        <input type="text" id="walletInput" class="wallet-input" placeholder="Paste wallet address here..." />
+        <button id="enterBtn" class="btn-ghost">ENTER</button>
+      </div>
+
+      <div class="scenarios" style="display: none;">
+        <button class="scenario" data-scenario="drainer">
+          <div class="scenario-icon">☣️</div>
+          <div class="scenario-content">
+            <div class="scenario-title">Drainer Entity</div>
+            <div class="scenario-desc">50 SOL to unverified contract</div>
+          </div>
+        </button>
+        <button class="scenario" data-scenario="unlimited_approval">
+          <div class="scenario-icon">♾️</div>
+          <div class="scenario-content">
+            <div class="scenario-title">Infinite Approval</div>
+            <div class="scenario-desc">Grant limitless token access</div>
+          </div>
+        </button>
+        <button class="scenario" data-scenario="fake_token">
+          <div class="scenario-icon">🎭</div>
+          <div class="scenario-content">
+            <div class="scenario-title">Impersonation Token</div>
+            <div class="scenario-desc">Receive deceptive asset</div>
+          </div>
+        </button>
+        <button class="scenario safe" data-scenario="safe">
+          <div class="scenario-icon">🛡️</div>
+          <div class="scenario-content">
+            <div class="scenario-title">Safe Transaction</div>
+            <div class="scenario-desc">0.001 SOL to System Program</div>
+          </div>
+        </button>
+      </div>
+
+      <div id="status" class="status hidden"></div>
+    </section>
+  </main>
+
+  <div id="intervention" class="intervention hidden" role="dialog" aria-modal="true">
+    <div class="intervention-backdrop"></div>
+    <div class="intervention-card glass-panel">
+      <div class="intervention-header">
+        <div class="pulse"></div>
+        <div class="intervention-title">SONAR INTERVENTION ACTIVE</div>
+        <div class="intervention-score">
+          RISK FACTOR: <span id="iScore">0</span>/100
+        </div>
+      </div>
+
+      <div class="intervention-body">
+        <div class="findings-block">
+          <div class="findings-label">THREAT ANALYSIS REPORT</div>
+          <div id="iSummary" class="summary"></div>
+          <ul id="iFindings" class="findings"></ul>
+        </div>
+
+        <div class="voice-block">
+          <div class="voice-label">AUDIO PLAYBACK REQUIRED</div>
+          <audio id="iAudio" controls></audio>
+        </div>
+      </div>
+
+      <div class="intervention-footer">
+        <div class="cooldown">
+          <div class="cooldown-label">TEMPORAL LOCKOUT</div>
+          <div class="cooldown-time">
+            <span id="iTimer">--</span>s
+          </div>
+          <div class="cooldown-bar">
+            <div id="iBar" class="cooldown-bar-fill"></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="cancelBtn" class="btn-cancel">ABORT TRANSACTION</button>
+          <button id="confirmBtn" class="btn-confirm" disabled>
+            ACKNOWLEDGE RISK — PROCEED
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/three-bg.js"></script>
+  <script type="module" src="/app.js"></script>
+</body>
+
+</html>
