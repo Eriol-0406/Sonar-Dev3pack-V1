@@ -27,7 +27,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { score: riskScore, findings } = score(sim, ctx, payload);
     const cooldownSeconds = cooldownFor(riskScore);
     const sessionId = randomUUID();
-    const voiceScript = buildVoiceScript(findings, riskScore, sessionId);
+    const character = payload.character || 'trump';
+    const voiceScript = buildVoiceScript(findings, riskScore, character, sessionId);
     const riskRequired = riskScore >= 40;
 
     // Generate audio inline so the frontend doesn't have to fetch
@@ -36,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let voiceAudioDataUrl: string | null = null;
     if (riskRequired) {
       try {
-        const buf = await voiceProvider.generate(voiceScript, sessionId);
+        const buf = await voiceProvider.generate(voiceScript, character, sessionId);
         voiceAudioDataUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
       } catch (err) {
         console.error('[/api/analyze] voice generation failed (continuing):', err);
@@ -53,6 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       voiceScript,
       voiceAudioDataUrl,
       sessionId,
+      character,
     };
 
     await logRisk({
@@ -63,6 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       scenario: payload.scenario ?? null,
       domain: ctx.domain,
       counterparty: ctx.counterparty,
+      character,
     });
 
     if (riskRequired) await startCooldown(verdict, payload.wallet);

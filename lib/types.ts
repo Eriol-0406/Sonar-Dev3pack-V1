@@ -6,6 +6,7 @@ export type InterceptorPayload = {
   counterparty?: string;
   messageText?: string;
   scenario?: ScenarioKey;
+  character?: string;
 };
 
 export type ScenarioKey =
@@ -72,11 +73,12 @@ export type RiskVerdict = {
   // without a shared store.
   voiceAudioDataUrl: string | null;
   sessionId: string;
+  character: string;
 };
 
 export interface VoiceProvider {
   readonly name: 'tts' | 'conversational';
-  generate(script: string, sessionId: string): Promise<Buffer>;
+  generate(script: string, character: string, sessionId: string): Promise<Buffer>;
 }
 
 export type CooldownEntry = {

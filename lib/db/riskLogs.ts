@@ -14,6 +14,7 @@ export type RiskLogRow = {
   domain: string | null;
   counterparty: string | null;
   timestamp: number;
+  character: string | null;
   outcome: RiskOutcome;
 };
 
@@ -25,6 +26,7 @@ export type LogRiskInput = {
   scenario?: string | null;
   domain?: string | null;
   counterparty?: string | null;
+  character?: string | null;
 };
 
 const rows: RiskLogRow[] = [];
@@ -41,6 +43,7 @@ export async function logRisk(input: LogRiskInput): Promise<void> {
     domain: input.domain ?? null,
     counterparty: input.counterparty ?? null,
     timestamp: Date.now(),
+    character: input.character ?? null,
     outcome: 'pending',
   });
 }

@@ -40,6 +40,32 @@
         Initiate a scenario. SONAR will intercept the payload, analyze the risk matrix,
         enforce a temporal cooldown, and deploy an audio warning before signature authorization.
       </p>
+      <div class="voice-selector-container">
+        <div class="selector-label">SELECT SECURITY AGENT VOICE</div>
+        <div class="voice-options">
+          <button class="voice-option active" data-character="trump">
+            <div class="voice-avatar-wrapper">
+              <img src="/trump_avatar.png" alt="Trump" class="voice-avatar" />
+              <div class="avatar-glow"></div>
+            </div>
+            <span class="voice-name">AGENT TRUMP</span>
+          </button>
+          <button class="voice-option" data-character="waifu">
+            <div class="voice-avatar-wrapper">
+              <img src="/waifu_avatar.png" alt="Waifu" class="voice-avatar" />
+              <div class="avatar-glow"></div>
+            </div>
+            <span class="voice-name">AGENT WAIFU</span>
+          </button>
+          <button class="voice-option" data-character="beyonce">
+            <div class="voice-avatar-wrapper">
+              <img src="/beyonce_avatar.png" alt="Beyonce" class="voice-avatar" />
+              <div class="avatar-glow"></div>
+            </div>
+            <span class="voice-name">AGENT BEYONCE</span>
+          </button>
+        </div>
+      </div>
 
       <div class="input-wrapper" style="display: flex; gap: 16px; margin-bottom: 24px;">
         <input type="text" id="walletInput" class="wallet-input" placeholder="Paste wallet address here..." />

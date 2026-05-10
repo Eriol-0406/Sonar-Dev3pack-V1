@@ -13,11 +13,13 @@ const els = {
   confirmBtn: document.getElementById('confirmBtn'),
   walletInput: document.getElementById('walletInput'),
   enterBtn: document.getElementById('enterBtn'),
+  voiceOptions: document.querySelectorAll('.voice-option'),
 };
 
 let walletPubkey = null;
 let activeSession = null;
 let cooldownTimer = null;
+let selectedCharacter = 'trump';
 
 function setStatus(message, kind = '') {
   els.status.classList.remove('hidden', 'success', 'error');
@@ -67,6 +69,7 @@ async function runScenario(scenario) {
         transaction: buildMockTransaction(scenario),
         type: 'signTransaction',
         scenario,
+        character: selectedCharacter,
       }),
     });
     if (!res.ok) {
@@ -175,6 +178,14 @@ els.scenarios.forEach((b) =>
 els.cancelBtn.addEventListener('click', cancelSign);
 els.confirmBtn.addEventListener('click', confirmSign);
 
+els.voiceOptions.forEach((opt) => {
+  opt.addEventListener('click', () => {
+    els.voiceOptions.forEach((o) => o.classList.remove('active'));
+    opt.classList.add('active');
+    selectedCharacter = opt.dataset.character;
+  });
+});
+
 // ── Real wallet analysis via ENTER button ─────────────────────
 async function analyzeWallet(targetAddress) {
   clearStatus();
@@ -192,6 +203,7 @@ async function analyzeWallet(targetAddress) {
         counterparty: targetAddress,
         transaction: buildMockTransaction('scan'),
         type: 'signTransaction',
+        character: selectedCharacter,
         // NO scenario → backend uses real APIs (Chainabuse, Helius, WHOIS)
       }),
     });

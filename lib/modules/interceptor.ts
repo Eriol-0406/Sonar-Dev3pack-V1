@@ -9,6 +9,7 @@ const payloadSchema = z.object({
   counterparty: z.string().min(32).max(44).optional(),
   messageText: z.string().max(4000).optional(),
   scenario: z.enum(['drainer', 'unlimited_approval', 'fake_token', 'phishing_message', 'safe']).optional(),
+  character: z.string().optional(),
 });
 
 export function parseInterceptorPayload(input: unknown): InterceptorPayload {

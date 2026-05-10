@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const entry = await getSession(sessionId);
     if (!entry) return res.status(404).json({ error: 'session_not_found' });
-    const audio = await voiceProvider.generate(entry.verdict.voiceScript, sessionId);
+    const audio = await voiceProvider.generate(entry.verdict.voiceScript, entry.verdict.character, sessionId);
     res.setHeader('content-type', 'audio/mpeg');
     res.setHeader('cache-control', 'private, max-age=300');
     return res.status(200).send(audio);

@@ -11,7 +11,7 @@ const schema = z.object({
   SOLANA_NETWORK: z.enum(['devnet', 'mainnet-beta', 'testnet']).default('devnet'),
   HELIUS_API_KEY: z.string().min(1, 'HELIUS_API_KEY is required'),
   WHOISXML_API_KEY: z.string().min(1, 'WHOISXML_API_KEY is required'),
-  CHAINABUSE_API_KEY: z.string().min(1, 'CHAINABUSE_API_KEY is required'),
+  CHAINABUSE_API_KEY: z.string().optional(),
 });
 
 type Config = z.infer<typeof schema>;
