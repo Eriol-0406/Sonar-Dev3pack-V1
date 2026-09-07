@@ -61,6 +61,8 @@ export type RiskContext = {
   walletAgeDays: number | null;
   hasPriorInteraction: boolean | null;
   scamReportCount: number | null;
+  /** Chainabuse reports naming the domain. */
+  domainReportCount: number | null;
   domainAgeDays: number | null;
   domainSuspicionReasons: string[];
   baseline: BaselineSnapshot | null;

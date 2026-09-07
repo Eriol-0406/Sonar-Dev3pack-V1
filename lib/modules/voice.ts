@@ -165,6 +165,13 @@ const RULE_LINES: Record<string, LineBuilder> = {
     }
     return "this address has scam reports against it";
   },
+  domain_scam_reports: (f) => {
+    const domain = (f.evidence?.domain as string | undefined) ?? 'this site';
+    const count = (f.evidence?.count as number | undefined) ?? 0;
+    return count >= 5
+      ? `${count} people already reported ${domain} as a scam on Chainabuse`
+      : `${domain} has already been reported as a scam on Chainabuse`;
+  },
   sanctioned_address: (f) => {
     const ids = (f.evidence?.identifications as Array<{ name?: string }> | undefined) ?? [];
     const name = ids[0]?.name;

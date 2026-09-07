@@ -1,7 +1,7 @@
 import type { InterceptorPayload, RiskContext, SimResult } from '../types.js';
 import { pickScenario } from './scenarios.js';
 import { getWalletAgeDays, hasPriorInteraction } from './sources/helius.js';
-import { getScamReportCount } from './sources/chainabuse.js';
+import { getScamReportCount, getDomainReportCount } from './sources/chainabuse.js';
 import { getDomainAgeDays, extractDomain } from './sources/whois.js';
 import { analyzeDomain } from './sources/domainPatterns.js';
 import { getBaseline } from './baseline.js';
@@ -53,6 +53,7 @@ export async function gather(
     prior,
     scamReportCount,
     domainAgeDays,
+    domainReportCount,
     baseline,
     blocklistHits,
     scamSnifferBlocked,
@@ -66,6 +67,7 @@ export async function gather(
         : Promise.resolve(null),
       counterparty ? getScamReportCount(counterparty, chainabuseChain) : Promise.resolve(null),
       domain ? getDomainAgeDays(domain) : Promise.resolve(null),
+      domain ? quiet('chainabuse-domain', getDomainReportCount(domain), null) : Promise.resolve(null),
       baselinePromise,
       quiet('blocklists', checkBlocklists({ address: counterparty, domain }), []),
       counterparty ? quiet('scamsniffer', isScamSnifferBlocked(counterparty), null) : Promise.resolve(null),
@@ -108,6 +110,7 @@ export async function gather(
     walletAgeDays,
     hasPriorInteraction: prior,
     scamReportCount,
+    domainReportCount,
     domainAgeDays,
     domainSuspicionReasons: domain ? analyzeDomain(domain) : [],
     baseline,

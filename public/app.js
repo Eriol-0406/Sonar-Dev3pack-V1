@@ -187,11 +187,23 @@ els.voiceOptions.forEach((opt) => {
 });
 
 // ── Real wallet analysis via ENTER button ─────────────────────
-async function analyzeWallet(targetAddress) {
+// Decide whether the user pasted a wallet address or a website.
+// Anything with a scheme, a slash, or a dotted hostname is a domain;
+// otherwise it is treated as an address on whatever chain it belongs to.
+function classifyTarget(raw) {
+  const v = raw.trim();
+  if (/^https?:\/\//i.test(v) || v.includes('/')) return 'domain';
+  if (/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(v) && !/\.near$/i.test(v)) return 'domain';
+  return 'address';
+}
+
+async function analyzeWallet(target) {
   clearStatus();
-  setStatus('Scanning wallet address…', '');
+  const kind = classifyTarget(target);
+  setStatus(kind === 'domain' ? 'Scanning website…' : 'Scanning wallet address…', '');
 
   const senderWallet = walletPubkey ?? '11111111111111111111111111111111';
+  const targetField = kind === 'domain' ? { domain: target.trim() } : { counterparty: target.trim() };
 
   let verdict;
   try {
@@ -200,7 +212,7 @@ async function analyzeWallet(targetAddress) {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         wallet: senderWallet,
-        counterparty: targetAddress,
+        ...targetField,
         transaction: buildMockTransaction('scan'),
         type: 'signTransaction',
         character: selectedCharacter,
@@ -223,7 +235,7 @@ async function analyzeWallet(targetAddress) {
   }
 
   if (!verdict.riskRequired) {
-    setStatus(`✓ Address looks safe (risk score ${verdict.score}/100). No threats detected.`, 'success');
+    setStatus(`✓ ${kind === 'domain' ? 'Website' : 'Address'} looks safe (risk score ${verdict.score}/100). No threats detected.`, 'success');
     return;
   }
 
@@ -231,15 +243,19 @@ async function analyzeWallet(targetAddress) {
 }
 
 els.enterBtn.addEventListener('click', () => {
-  const address = els.walletInput.value.trim();
-  if (!address) {
-    setStatus('Please paste a wallet address.', 'error');
+  const target = els.walletInput.value.trim();
+  if (!target) {
+    setStatus('Please paste a wallet address or website URL.', 'error');
     return;
   }
-  if (address.length < 20 || address.length > 120 || /\s/.test(address)) {
+  if (/\s/.test(target)) {
+    setStatus('That does not look like a wallet address or website.', 'error');
+    return;
+  }
+  if (classifyTarget(target) === 'address' && (target.length < 20 || target.length > 120)) {
     setStatus('That does not look like a wallet address.', 'error');
     return;
   }
 
-  analyzeWallet(address);
+  analyzeWallet(target);
 });

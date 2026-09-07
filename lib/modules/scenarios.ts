@@ -13,6 +13,7 @@ const empty: RiskContext = {
   walletAgeDays: null,
   hasPriorInteraction: null,
   scamReportCount: null,
+  domainReportCount: null,
   domainAgeDays: null,
   domainSuspicionReasons: [],
   baseline: null,

@@ -5,7 +5,8 @@ const payloadSchema = z.object({
   wallet: z.string().min(32).max(44),
   transaction: z.string().min(1),
   type: z.enum(['signTransaction', 'signMessage']),
-  domain: z.string().min(1).max(253).optional(),
+  // Accepts a bare hostname or a full URL; extractDomain() normalises it.
+  domain: z.string().trim().min(1).max(2048).optional(),
   // Any chain: BTC legacy is 26+, bech32m / Cardano can exceed 60.
   counterparty: z.string().trim().min(20).max(120).optional(),
   messageText: z.string().max(4000).optional(),

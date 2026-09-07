@@ -149,6 +149,19 @@ const RULES: Rule[] = [
     },
   },
   {
+    id: 'domain_scam_reports',
+    evaluate: ({ ctx }) => {
+      if (!ctx.domainReportCount || ctx.domainReportCount <= 0) return null;
+      return {
+        rule: 'domain_scam_reports',
+        level: 'critical',
+        points: 40,
+        message: `${ctx.domainReportCount} scam report(s) filed against "${ctx.domain}" on Chainabuse`,
+        evidence: { count: ctx.domainReportCount, domain: ctx.domain },
+      };
+    },
+  },
+  {
     id: 'sanctioned_address',
     evaluate: ({ ctx }) => {
       if (!ctx.sanctions || ctx.sanctions.length === 0) return null;

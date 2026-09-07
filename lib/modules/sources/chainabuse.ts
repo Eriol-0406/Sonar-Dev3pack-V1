@@ -51,3 +51,55 @@ export async function getScamReportCount(
   if (count != null) cache.set(cacheKey, { count, at: Date.now() });
   return count;
 }
+
+const domainCache = new Map<string, { count: number | null; at: number }>();
+
+function hostOf(entry: string): string | null {
+  try {
+    const u = new URL(/^https?:\/\//i.test(entry) ? entry : `https://${entry}`);
+    return u.hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Number of Chainabuse reports naming `domain` (hostname, no scheme).
+ * Chainabuse's domain filter is a substring search, so "jup.ag" also returns
+ * reports about "jup.ag-swap.online". Only reports whose hostname is exactly
+ * `domain` are counted, capped at one page of 50. Victims also often list
+ * the genuine site next to the phishing one, so a single untrusted report is
+ * ignored: the count is returned only if at least one exact report is marked
+ * trusted by Chainabuse, or three or more exact reports exist.
+ */
+export async function getDomainReportCount(domain: string): Promise<number | null> {
+  const key = domain.toLowerCase().replace(/^www\./, '');
+  const cached = domainCache.get(key);
+  if (cached && Date.now() - cached.at < TTL_MS) return cached.count;
+
+  const url = `https://api.chainabuse.com/v0/reports?domain=${encodeURIComponent(key)}&perPage=50`;
+  const count = await pool().withKey(async (k) => {
+    const authHeader = 'Basic ' + Buffer.from(`${k}:`, 'utf8').toString('base64');
+    const res = await fetch(url, {
+      headers: { authorization: authHeader, accept: 'application/json' },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (res.status === 429) throw new KeyExhaustedError();
+    if (!res.ok) throw new Error(`Chainabuse → ${res.status}`);
+    const json = (await res.json()) as {
+      reports?: Array<{ trusted?: boolean; addresses?: Array<{ domain?: string | null }> }>;
+    };
+    let exact = 0;
+    let trusted = 0;
+    for (const r of json.reports ?? []) {
+      if ((r.addresses ?? []).some((a) => a.domain && hostOf(a.domain) === key)) {
+        exact++;
+        if (r.trusted) trusted++;
+      }
+    }
+    return trusted > 0 || exact >= 3 ? exact : 0;
+  });
+
+  if (count != null) domainCache.set(key, { count, at: Date.now() });
+  return count;
+}
