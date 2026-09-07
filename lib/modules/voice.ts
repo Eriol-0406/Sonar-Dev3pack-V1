@@ -314,7 +314,13 @@ export class TTSVoiceProvider implements VoiceProvider {
     if (!res.ok) {
       const errorText = await res.text();
       console.error(`[ElevenLabs] Error ${res.status}: ${errorText}`);
-      throw new Error(`TTS generation failed: ${res.status}`);
+      let detail = errorText.slice(0, 300);
+      try {
+        const j = JSON.parse(errorText) as { detail?: { status?: string; message?: string } | string };
+        if (typeof j.detail === 'string') detail = j.detail;
+        else if (j.detail) detail = [j.detail.status, j.detail.message].filter(Boolean).join(': ');
+      } catch {}
+      throw new Error(`ElevenLabs ${res.status} (voice ${voiceId}): ${detail}`);
     }
 
     return Buffer.from(await res.arrayBuffer());

@@ -35,12 +35,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // /voice/:sessionId — that follow-up request can't see the cooldown row
     // when Vercel routes it to a different function instance.
     let voiceAudioDataUrl: string | null = null;
+    let voiceError: string | null = null;
     if (riskRequired) {
       try {
         const buf = await voiceProvider.generate(voiceScript, character, sessionId);
         voiceAudioDataUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
       } catch (err) {
         console.error('[/api/analyze] voice generation failed (continuing):', err);
+        voiceError = err instanceof Error ? err.message : String(err);
       }
     }
 
@@ -53,6 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       findings,
       voiceScript,
       voiceAudioDataUrl,
+      voiceError,
       sessionId,
       character,
     };

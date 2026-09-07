@@ -105,6 +105,8 @@ export type RiskVerdict = {
   // request; that round trip can't survive Vercel's cross-instance routing
   // without a shared store.
   voiceAudioDataUrl: string | null;
+  /** Why audio is null, when TTS failed (provider status + message). */
+  voiceError: string | null;
   sessionId: string;
   character: string;
 };

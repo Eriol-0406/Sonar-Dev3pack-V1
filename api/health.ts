@@ -13,6 +13,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     ok: true,
     runtime: process.version,
     has_elevenlabs_key: !!process.env.ELEVENLABS_API_KEY,
+    elevenlabs_key_format: process.env.ELEVENLABS_API_KEY?.startsWith('sk_') ? 'sk_ (ok)' : 'not an sk_ key',
     has_helius_key: !!process.env.HELIUS_API_KEY,
     has_chainabuse_key: !!(
       process.env.CHAINABUSE_API_KEY || Object.keys(process.env).some((k) => k.startsWith('CHAINABUSE_API_KEY_'))
