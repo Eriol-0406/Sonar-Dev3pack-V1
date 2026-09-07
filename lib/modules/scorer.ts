@@ -24,6 +24,23 @@ const PHISHING_PHRASES = [
   /verify\s+wallet\s+ownership.*urgent/i,
 ];
 
+function heuristicFinding(
+  ctx: RiskContext,
+  id: RiskContext['heuristics'][number]['id'],
+  level: RiskFinding['level'],
+  points: number,
+): RiskFinding | null {
+  const flag = ctx.heuristics.find((h) => h.id === id);
+  if (!flag) return null;
+  return {
+    rule: id,
+    level,
+    points,
+    message: flag.message,
+    evidence: { ...flag.evidence, counterparty: ctx.counterparty },
+  };
+}
+
 const RULES: Rule[] = [
   {
     id: 'large_transfer',
@@ -130,6 +147,85 @@ const RULES: Rule[] = [
         evidence: { count: ctx.scamReportCount, counterparty: ctx.counterparty },
       };
     },
+  },
+  {
+    id: 'sanctioned_address',
+    evaluate: ({ ctx }) => {
+      if (!ctx.sanctions || ctx.sanctions.length === 0) return null;
+      const first = ctx.sanctions[0];
+      return {
+        rule: 'sanctioned_address',
+        level: 'critical',
+        points: 50,
+        message: `This address is on a sanctions list (${first.name})`,
+        evidence: { counterparty: ctx.counterparty, identifications: ctx.sanctions },
+      };
+    },
+  },
+  {
+    id: 'webacy_risk',
+    evaluate: ({ ctx }) => {
+      const w = ctx.webacy;
+      if (!w) return null;
+      const score = w.overallRisk ?? 0;
+      const severe = score >= 70 || w.high > 0;
+      const moderate = score >= 40 || w.medium > 0;
+      if (!severe && !moderate) return null;
+      const tagText = w.tags.length ? `: ${w.tags.slice(0, 3).join(', ')}` : '';
+      return {
+        rule: 'webacy_risk',
+        level: severe ? 'critical' : 'warning',
+        points: severe ? 35 : 15,
+        message: `Webacy rates this address ${severe ? 'high' : 'medium'} risk${tagText}`,
+        evidence: { counterparty: ctx.counterparty, overallRisk: w.overallRisk, high: w.high, medium: w.medium, tags: w.tags },
+      };
+    },
+  },
+  {
+    id: 'blocklisted_address',
+    evaluate: ({ ctx }) => {
+      const hits = ctx.blocklistHits.filter((h) => h.kind === 'address');
+      if (hits.length === 0) return null;
+      const sources = [...new Set(hits.map((h) => h.source))];
+      return {
+        rule: 'blocklisted_address',
+        level: 'critical',
+        points: 45,
+        message: `This address is on the ${sources.join(' and ')} scam blocklist`,
+        evidence: { counterparty: ctx.counterparty, sources, chain: ctx.counterpartyChain },
+      };
+    },
+  },
+  {
+    id: 'blocklisted_domain',
+    evaluate: ({ ctx }) => {
+      const hits = ctx.blocklistHits.filter((h) => h.kind === 'domain');
+      if (hits.length === 0) return null;
+      const sources = [...new Set(hits.map((h) => h.source))];
+      return {
+        rule: 'blocklisted_domain',
+        level: 'critical',
+        points: 45,
+        message: `Domain "${ctx.domain}" is on the ${sources.join(' and ')} phishing blocklist`,
+        evidence: { domain: ctx.domain, matched: hits[0].matched, sources },
+      };
+    },
+  },
+  {
+    id: 'sweep_pattern',
+    evaluate: ({ ctx }) => heuristicFinding(ctx, 'sweep_pattern', 'critical', 35),
+  },
+  {
+    id: 'instant_drain',
+    evaluate: ({ ctx }) => heuristicFinding(ctx, 'instant_drain', 'warning', 20),
+  },
+  {
+    id: 'dust_sprayer',
+    evaluate: ({ ctx }) => heuristicFinding(ctx, 'dust_sprayer', 'warning', 25),
+  },
+  {
+    id: 'burst_activity',
+    evaluate: ({ ctx }) => heuristicFinding(ctx, 'burst_activity', 'warning', 15),
   },
   {
     id: 'domain_age',

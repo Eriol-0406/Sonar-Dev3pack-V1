@@ -165,6 +165,33 @@ const RULE_LINES: Record<string, LineBuilder> = {
     }
     return "this address has scam reports against it";
   },
+  sanctioned_address: (f) => {
+    const ids = (f.evidence?.identifications as Array<{ name?: string }> | undefined) ?? [];
+    const name = ids[0]?.name;
+    return name ? `this address is sanctioned. ${name}. That is a crime to touch` : 'this address is on a government sanctions list';
+  },
+  webacy_risk: (f) => {
+    const tags = (f.evidence?.tags as string[] | undefined) ?? [];
+    return tags.length ? `Webacy flags it for ${tags[0].toLowerCase()}` : 'Webacy rates this address as risky';
+  },
+  blocklisted_address: (f) => {
+    const sources = (f.evidence?.sources as string[] | undefined) ?? [];
+    return sources.length
+      ? `this address is on the ${sources.join(' and ')} scam list. Already flagged`
+      : 'this address is on a scam blocklist';
+  },
+  blocklisted_domain: (f) => {
+    const domain = (f.evidence?.domain as string | undefined) ?? 'this site';
+    return `${domain} is a known phishing site. It's on the blocklist`;
+  },
+  sweep_pattern: () =>
+    'this wallet collects money from dozens of people and sweeps it straight out. That is a drainer',
+  instant_drain: () =>
+    'money goes into this wallet and leaves the second it lands',
+  dust_sprayer: () =>
+    'this wallet sprays dust at thousands of people. Address poisoning',
+  burst_activity: () =>
+    'brand new wallet, already hyperactive. Bots do that',
   domain_age: (f) => {
     const days = (f.evidence?.domainAgeDays as number | undefined) ?? null;
     const domain = (f.evidence?.domain as string | undefined) ?? "this site";

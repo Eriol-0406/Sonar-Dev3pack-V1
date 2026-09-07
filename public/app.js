@@ -236,8 +236,8 @@ els.enterBtn.addEventListener('click', () => {
     setStatus('Please paste a wallet address.', 'error');
     return;
   }
-  if (address.length < 32 || address.length > 44) {
-    setStatus('Invalid Solana address. Must be 32-44 characters.', 'error');
+  if (address.length < 20 || address.length > 120 || /\s/.test(address)) {
+    setStatus('That does not look like a wallet address.', 'error');
     return;
   }
 

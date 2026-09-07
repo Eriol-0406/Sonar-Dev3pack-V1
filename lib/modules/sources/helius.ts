@@ -65,6 +65,15 @@ export async function getRecentParsedTransactions(
   }
 }
 
+export async function getSolBalance(address: string): Promise<number | null> {
+  try {
+    const r = await rpc<{ value: number }>('getBalance', [address]);
+    return typeof r?.value === 'number' ? r.value : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getWalletAgeDays(address: string): Promise<number | null> {
   const cached = ageCache.get(address);
   if (cached && Date.now() - cached.at < TTL_MS) return cached.ageDays;

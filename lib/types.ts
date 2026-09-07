@@ -24,9 +24,40 @@ export type SimResult = {
   rawNote: string;
 };
 
+export type BlocklistHitRef = {
+  source: 'phantom' | 'scamsniffer' | 'metamask';
+  kind: 'address' | 'domain';
+  matched: string;
+};
+
+export type HeuristicFlagRef = {
+  id: 'sweep_pattern' | 'dust_sprayer' | 'burst_activity' | 'instant_drain';
+  message: string;
+  evidence: Record<string, unknown>;
+};
+
+export type SanctionHitRef = { category: string; name: string; description?: string; url?: string };
+
+export type WebacyRiskRef = {
+  overallRisk: number | null;
+  high: number;
+  medium: number;
+  tags: string[];
+};
+
 export type RiskContext = {
   domain: string | null;
   counterparty: string | null;
+  /** Chainalysis sanctions identifications; null when the source is unavailable. */
+  sanctions: SanctionHitRef[] | null;
+  /** Webacy risk summary; null when unavailable or chain unsupported. */
+  webacy: WebacyRiskRef | null;
+  /** Chain detected from the counterparty address format (Chainabuse id), or null if unrecognised. */
+  counterpartyChain: string | null;
+  /** Community blocklist hits (Phantom, ScamSniffer, MetaMask). */
+  blocklistHits: BlocklistHitRef[];
+  /** On-chain behaviour flags for Solana counterparties. */
+  heuristics: HeuristicFlagRef[];
   walletAgeDays: number | null;
   hasPriorInteraction: boolean | null;
   scamReportCount: number | null;

@@ -61,6 +61,42 @@ Open `http://localhost:3000`.
    builds the static `public/` and serverless `api/` automatically. No build
    step — TypeScript is compiled by Vercel.
 
+## Threat intelligence sources
+
+Counterparty addresses are checked on every chain the format can be
+recognised for (`lib/modules/chains.ts`): Solana, EVM (ETH/BSC/Polygon/
+Arbitrum/Base/...), Bitcoin, Litecoin, Dogecoin, Bitcoin Cash, Tron, XRP,
+TON, Aptos, Cardano, Cosmos, Stellar, Algorand, NEAR, Polkadot.
+
+| Source | What it covers | Key needed | Limits | Notes |
+|---|---|---|---|---|
+| Chainabuse `/v0/reports` | Community scam reports, 47 chains | Yes (`CHAINABUSE_API_KEY_n`) | **10 requests / key / month** on the free tier, 429 after that | Round-robin across slots; a slot that returns 429 is skipped for 24h. EVM addresses are searched across all chains. |
+| Phantom blocklist | Solana phishing domains (~2.3k) | No | None (static GitHub file, re-fetched hourly) | |
+| ScamSniffer scam-database | Phishing domains (~350k) + drainer addresses (~2.5k, EVM) | No | None (static GitHub files, re-fetched hourly) | |
+| MetaMask eth-phishing-detect | Phishing domains (~98k) | No | None (static GitHub file, re-fetched hourly) | |
+| Helius | Wallet age, prior interaction, behavioural heuristics (Solana only) | Yes (`HELIUS_API_KEY`) | Free tier: 1M credits / month, 10 RPS | Heuristics: `sweep_pattern`, `instant_drain`, `dust_sprayer`, `burst_activity` in `lib/modules/sources/heuristics.ts`. |
+| ScamSniffer lookup API | Live drainer address check (mostly EVM) | Optional (`SCAMSNIFFER_API_KEY[_n]`) | Paid only: Standard plan from $999/month, keys via b2b@scamsniffer.io | Folds into the `blocklisted_address` rule. The free GitHub list above covers the same data with a daily delay. |
+| OFAC SDN list (0xB10C mirror) | US Treasury sanctioned addresses: BTC, ETH, SOL, TRX, LTC, BCH, XRP, ARB, BSC, USDT/USDC and more | No | None (static GitHub files, re-fetched daily) | `sanctioned_address` rule, 50 points. |
+| Chainalysis sanctions screening | Adds EU/UN designations on top of OFAC | Optional (`CHAINALYSIS_API_KEY[_n]`) | Free-tier request form is no longer reachable; sales contact only | Same rule; merged with OFAC hits. |
+| Webacy | Address risk score + tags (SOL, ETH, BTC, TON, SUI, XLM) | Optional (`WEBACY_API_KEY[_n]`) | Free demo tier, but signup requires a non-personal (organisation domain) email; 402/429 rotate | `webacy_risk` rule, 35 or 15 points. |
+| WhoisXML | Domain registration age | Yes (`WHOISXML_API_KEY`) | Free tier: 500 lookups / month total | Cached 24h per domain. |
+
+All results are cached in function memory (1h for lists and lookups, 24h for
+WHOIS), so repeated checks of the same address within a warm instance cost
+nothing.
+
+Every keyed provider reads its keys through `lib/modules/keyPool.ts`:
+`<PREFIX>_API_KEY` plus `<PREFIX>_API_KEY_1..32`, round-robined, with a 24h
+cooldown on any slot that returns 429. Providers with no key set are skipped
+silently.
+
+### Not wired
+
+| Source | Why |
+|---|---|
+| GoPlus address security | Solana endpoint returned errors when tested |
+| Blockaid / Blowfish | Enterprise contract only |
+
 ## File map
 
 ```
@@ -99,7 +135,10 @@ lib/
     ├── cooldown.ts             cooldown_sessions table
     ├── voice.ts                ElevenLabs TTS provider
     ├── baseline.ts             baseline computation
-    └── sources/                helius, chainabuse, whois, domainPatterns
+    ├── chains.ts               address-format chain detection (multi-chain)
+    ├── keyPool.ts              round-robin API key slots with cooldown
+    └── sources/                helius, chainabuse, whois, domainPatterns, blocklists,
+                                heuristics, scamsniffer, chainalysis, ofac, webacy
 
 public/
 ├── index.html                  static page

@@ -5,6 +5,11 @@ export type ScenarioBundle = { sim: SimResult; ctx: RiskContext };
 const empty: RiskContext = {
   domain: null,
   counterparty: null,
+  sanctions: null,
+  webacy: null,
+  counterpartyChain: null,
+  blocklistHits: [],
+  heuristics: [],
   walletAgeDays: null,
   hasPriorInteraction: null,
   scamReportCount: null,
