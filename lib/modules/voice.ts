@@ -294,14 +294,30 @@ export class TTSVoiceProvider implements VoiceProvider {
   readonly name = 'tts' as const;
 
   async generate(script: string, character: string, _sessionId: string): Promise<Buffer> {
-    // ElevenLabs voice IDs (must be present in the account's My Voices).
-    const voiceIds: Record<string, string> = {
-      jessie: '7ceZgj78jCCeAW93ItNk', // Jessie - Friendly Educator
-      ak: 'y0SYydk17lMbUIUvSf3N', // AK - British Posh Well-Spoken Old Man
-      elon: 'rJ4KGss9TSKfyhkSuCRh', // Elon - Steady, Articulate and Dynamic
+    // Primary: library voices added to the account's My Voices. ElevenLabs
+    // only allows these over the API on paid plans (402 on free), so each
+    // character also has a premade fallback voice that every plan can use.
+    const voices: Record<string, { primary: string; fallback: string }> = {
+      jessie: { primary: '7ceZgj78jCCeAW93ItNk', fallback: 'cgSgspJ2msm6clMCkdW9' }, // Jessie - Friendly Educator → premade "Jessica"
+      ak: { primary: 'y0SYydk17lMbUIUvSf3N', fallback: 'JBFqnCBsd6RMkjVDRZzb' }, // AK - British Posh Old Man → premade "George"
+      elon: { primary: 'rJ4KGss9TSKfyhkSuCRh', fallback: 'nPczCjzI2devNBz1zQrb' }, // Elon - Steady, Articulate → premade "Brian"
     };
+    const v = voices[character] ?? { primary: config.ELEVENLABS_VOICE_ID, fallback: 'cgSgspJ2msm6clMCkdW9' };
 
-    const voiceId = voiceIds[character] || config.ELEVENLABS_VOICE_ID;
+    try {
+      return await this.tts(script, v.primary);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Voice missing from the account (404) or plan-gated (402): use the premade voice.
+      if (/ElevenLabs (402|404) /.test(msg) && v.fallback !== v.primary) {
+        console.warn(`[ElevenLabs] ${character}: primary voice unavailable (${msg.slice(0, 80)}...), using fallback`);
+        return await this.tts(script, v.fallback);
+      }
+      throw err;
+    }
+  }
+
+  private async tts(script: string, voiceId: string): Promise<Buffer> {
     const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
     const res = await fetch(url, {
       method: 'POST',
