@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { score: riskScore, findings } = score(sim, ctx, payload);
     const cooldownSeconds = cooldownFor(riskScore);
     const sessionId = randomUUID();
-    const character = payload.character || 'trump';
+    const character = payload.character || 'jessie';
     const voiceScript = buildVoiceScript(findings, riskScore, character, sessionId);
     const riskRequired = riskScore >= 40;
 

@@ -1,107 +1,112 @@
 import type { RiskFinding, VoiceProvider } from '../types.js';
 import { config } from '../config.js';
 
-const TRUMP_PACK = {
+const JESSIE_PACK = {
+  // Friendly educator: warm, patient, explains the "why", never scolds.
   openersHigh: [
-    'Whoa whoa whoa. Stop. This is bad, folks. Really bad.',
-    "Listen — listen to me. This thing? Total disaster. Don't sign it.",
-    "Hold on. Hold on a second. This is the dumbest thing I've seen all day.",
-    "Hey, big guy. Don't do this. Believe me. Don't do this.",
+    "Okay, pause with me for a second. I need you to see this before you sign anything.",
+    "Hey, hold on. I know this looks fine, but let me walk you through what I found.",
+    "Let's slow down together. There are some serious red flags here, and I want you to understand them.",
+    "Before you tap that, let me show you something important. This is exactly how people get caught.",
   ],
   openersMed: [
-    'Hey, hold up. Couple things. Just listen for a minute.',
-    'Look, look. We gotta talk about this. Quick.',
-    "Pause for a second. Something doesn't smell right, frankly.",
-    "Hey. Hey. Before you tap that — listen up.",
+    "Quick check-in before you continue. A couple of things stood out to me.",
+    "Let's take a breath here. Nothing is certain yet, but here's what I noticed.",
+    "One moment. I'd rather over-explain than watch you lose funds, so here's the picture.",
   ],
   openersLow: [
-    'Quick word. Just a quick word, you know.',
-    'Heads up, partner. Nothing crazy. But listen.',
-    "Look — small thing. But you should hear it.",
+    "Small thing, and probably nothing. But you should know it.",
+    "Just a gentle heads-up. Here's what I saw.",
+    "Nothing alarming, but I'd be a poor teacher if I didn't mention it.",
   ],
   closersHigh: [
-    "Cancel this. Cancel it. Walk away. Big-league mistake otherwise.",
-    "Listen to your gut. Cancel. Live to not-get-scammed another day, you know what I mean.",
-    "Don't do it. Just don't. Cancel and we'll talk later. Maybe.",
-    "Hit cancel. Hit it hard. Trust me. Nobody cancels better than you.",
+    "My honest advice: cancel this one. Go to the real site yourself, type the address by hand, and check. You lose nothing by waiting.",
+    "Please cancel. Scammers count on you feeling rushed. Take the time, verify through an official channel, and come back if it checks out.",
+    "Cancel it. Then think about how you got here, because that's the lesson that protects you next time.",
   ],
   closersMed: [
-    "If anything feels off, cancel. Verify on the real channels. Be smart for once.",
-    "Cancel first, ask questions later. Trust me on this one.",
-    "Hit cancel. Check the real site. Then come back. Maybe.",
+    "I'd cancel and double-check through the official site first. If it's real, it'll still be there in five minutes.",
+    "When in doubt, wait it out. Verify first, sign second.",
+    "Cancel for now. Confirm it independently, then decide with a clear head.",
   ],
   closersLow: [
-    "Take a breath. If it still looks fine, you can go. Or don't. Up to you, big guy.",
-    "Quick gut check. Then proceed. Or cancel. Not my money.",
+    "If it still makes sense to you, go ahead. You've done the check, and that's what matters.",
+    "Take a second, trust your judgement, and proceed if it all adds up.",
   ],
 };
 
-const WAIFU_PACK = {
+const AK_PACK = {
+  // Posh, well-spoken elderly British gentleman: dry, unimpressed, faintly appalled.
   openersHigh: [
-    'Yamete! Please stop, senpai! This looks really dangerous!',
-    "Wait! My sensors are screaming! Don't sign this, please!",
-    "Onii-chan, no! This is a total disaster! Please look away!",
+    "Good heavens. No. Absolutely not. Put that down at once.",
+    "I say. Before you do something profoundly foolish, do allow me a word.",
+    "Oh dear. Oh dear, oh dear. One rather hoped you'd know better than this.",
+    "Stop. I shan't say it twice. Well, I shall, but I'd rather not.",
   ],
   openersMed: [
-    "Um, excuse me? We should probably talk about this...",
-    "Heh, hold on a second! Something feels a bit off, don't you think?",
-    "Wait, wait! Before you do that, please listen to me!",
+    "A moment, if you please. Something here is not quite cricket.",
+    "Hmm. I've seen this sort of thing before, and it seldom ends in champagne.",
+    "Do forgive the interruption, but I have concerns. Several, in fact.",
   ],
   openersLow: [
-    "Just a quick heads up! It's probably nothing, but...",
-    "Hey! Can I have a moment of your time? It's important!",
-    "Look, look! Just a small thing I noticed!",
+    "A trifling matter, but worth a mention over tea.",
+    "Nothing dreadful. Merely an observation from an old man.",
+    "One small note, if you'll indulge me.",
   ],
   closersHigh: [
-    "Please cancel it! I don't want anything bad to happen to you!",
-    "Trust your heart and hit cancel! We can find a better way!",
-    "It's too risky! Please, just walk away from this one!",
+    "Cancel it. Have a cup of tea. Then verify through the proper channels like a civilised person.",
+    "Walk away, dear boy. Or girl. Whichever. Walk away regardless.",
+    "I implore you: cancel. Fortune favours the bold, but it positively adores the careful.",
   ],
   closersMed: [
-    "If it feels wrong, it probably is! Maybe check the official site first?",
-    "Safety first! Let's cancel for now and be sure, okay?",
+    "I'd cancel and make enquiries first. Haste has bankrupted better men than either of us.",
+    "Cancel, verify, and only then proceed. In that order, mind.",
+    "Prudence, my dear fellow. Check the genuine article before committing.",
   ],
   closersLow: [
-    "Be careful, okay? I'll be watching over you!",
-    "Take a deep breath! You've got this, whatever you decide!",
+    "If it still seems in order, do carry on. I've said my piece.",
+    "Proceed if you must. I shall be here, quietly judging, should it go wrong.",
   ],
 };
 
-const BEYONCE_PACK = {
+const ELON_PACK = {
+  // Steady, articulate engineer: calm, precise, first-principles reasoning.
   openersHigh: [
-    "Hold up! Stop right there. This is not the move, honey.",
-    "Listen, I need you to focus. This is a total disaster. Do not sign.",
-    "Queen, stop. This is looking real sketchy. Don't let them play you.",
+    "Okay. Stop. Let's reason about this from first principles, because the data here is bad.",
+    "Hold on. I've looked at the signals, and the probability this is legitimate is very low.",
+    "Wait. Don't sign yet. Every indicator on this one is pointing the wrong way.",
+    "Let me be direct. This has the signature of a drainer. Not a maybe. A pattern.",
   ],
   openersMed: [
-    "Wait a minute. We need to talk about this, real quick.",
-    "Look, I'm seeing some red flags. Let's take a beat.",
-    "Before you hit that button, listen to what I have to say.",
+    "Quick pause. The risk model flagged a few things that need your attention.",
+    "Before you proceed, some anomalies. Not conclusive, but non-trivial.",
+    "Let's look at the numbers for a second. A couple of them are off.",
   ],
   openersLow: [
-    "Just a quick word. I want you to be safe out here.",
-    "Heads up. It's a small thing, but you should know.",
-    "Listen, I'm just looking out for you. Hear me out.",
+    "Minor signal. Low weight. Still worth logging.",
+    "Nothing critical. One observation before you continue.",
+    "Small anomaly. Probably noise. Mentioning it anyway.",
   ],
   closersHigh: [
-    "Cancel it. Walk away with your head held high. Don't let them take your crown.",
-    "Trust your intuition. Hit cancel. You're too smart for this.",
-    "Don't do it. Slay another day, but not like this. Cancel.",
+    "Cancel. Verify the source through an independent channel. The cost of waiting is zero. The cost of being wrong is everything.",
+    "Abort this one. Rapid unscheduled disassembly of your wallet is not a good outcome.",
+    "Cancel it. Assume it's hostile until proven otherwise. That's just good engineering.",
   ],
   closersMed: [
-    "If it doesn't feel right, it isn't. Check the source and come back stronger.",
-    "Cancel for now. Better safe than sorry, darling.",
+    "I'd cancel and confirm through the official site. Reduce uncertainty first, then act.",
+    "Cancel, verify, iterate. Signing is the one step you can't roll back.",
+    "Hold. Get more data. Then decide.",
   ],
   closersLow: [
-    "Take a moment. You're in control. Do what's best for you.",
-    "Stay flawless. Whether you proceed or cancel, make sure it's your choice.",
+    "If the rest checks out, proceed. Risk is acceptable.",
+    "Your call. The signal is weak. Go ahead if you've verified the basics.",
   ],
 };
 
-const VOICE_PACKS: Record<string, typeof TRUMP_PACK> = {
-  trump: TRUMP_PACK,
-  waifu: WAIFU_PACK,
-  beyonce: BEYONCE_PACK,
+const VOICE_PACKS: Record<string, typeof JESSIE_PACK> = {
+  jessie: JESSIE_PACK,
+  ak: AK_PACK,
+  elon: ELON_PACK,
 };
 const CONNECTORS = [
   'And another thing — ',
@@ -248,14 +253,14 @@ function joinSentences(parts: string[]): string {
 export function buildVoiceScript(
   findings: RiskFinding[],
   score: number,
-  character = 'trump',
+  character = 'jessie',
   sessionId = 'default',
 ): string {
   if (findings.length === 0) {
     return "Looks clean. You can sign. Probably fine, who knows.";
   }
 
-  const pack = VOICE_PACKS[character] || TRUMP_PACK;
+  const pack = VOICE_PACKS[character] || JESSIE_PACK;
   const ordered = [...findings].sort((a, b) => b.points - a.points);
   const top = ordered.slice(0, 3);
 
@@ -289,10 +294,11 @@ export class TTSVoiceProvider implements VoiceProvider {
   readonly name = 'tts' as const;
 
   async generate(script: string, character: string, _sessionId: string): Promise<Buffer> {
+    // ElevenLabs voice IDs (must be present in the account's My Voices).
     const voiceIds: Record<string, string> = {
-      trump: 'wRTntKFRjl11p3GGUDKC',
-      waifu: 'CquaNG4wdtx6lUyh6Ivi',
-      beyonce: 'oI944CFroe54xCXQrRyz',
+      jessie: '7ceZgj78jCCeAW93ItNk', // Jessie - Friendly Educator
+      ak: 'y0SYydk17lMbUIUvSf3N', // AK - British Posh Well-Spoken Old Man
+      elon: 'rJ4KGss9TSKfyhkSuCRh', // Elon - Steady, Articulate and Dynamic
     };
 
     const voiceId = voiceIds[character] || config.ELEVENLABS_VOICE_ID;

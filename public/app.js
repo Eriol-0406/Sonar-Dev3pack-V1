@@ -19,7 +19,7 @@ const els = {
 let walletPubkey = null;
 let activeSession = null;
 let cooldownTimer = null;
-let selectedCharacter = 'trump';
+let selectedCharacter = 'jessie';
 
 function setStatus(message, kind = '') {
   els.status.classList.remove('hidden', 'success', 'error');
